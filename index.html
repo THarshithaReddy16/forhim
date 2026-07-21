@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PICKUP LINE VENDING MACHINE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FFD23F;
+    --bg-dot: #F2B705;
+    --ink: #241546;
+    --pink: #FF3E7F;
+    --blue: #00C2D1;
+    --green: #2FD17A;
+    --card: #FFFBEF;
+    --shadow: 6px 6px 0 var(--ink);
+    --shadow-sm: 4px 4px 0 var(--ink);
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background-color: var(--bg);
+    background-image: radial-gradient(var(--bg-dot) 1.6px, transparent 1.6px);
+    background-size: 18px 18px;
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{ max-width: 980px; margin:0 auto; padding: 40px 20px 80px; }
+
+  .hero{ text-align:center; padding: 10px 0 10px; position:relative; }
+  .badge{
+    display:inline-block; background:var(--pink); color:#fff; font-family:'Space Mono',monospace;
+    font-weight:700; font-size:12px; letter-spacing:.12em; padding:6px 14px; border:3px solid var(--ink);
+    border-radius:999px; transform: rotate(-3deg); box-shadow: var(--shadow-sm);
+  }
+  h1.title{
+    font-family:'Bangers', cursive; font-weight:400; letter-spacing:.02em;
+    font-size: clamp(40px, 8vw, 80px); line-height:.95; margin:18px 0 6px;
+    color: var(--ink); text-shadow: 4px 4px 0 var(--pink), 8px 8px 0 var(--blue);
+  }
+  .nameField{
+    font-family:'Bangers', cursive; font-size: clamp(24px,5vw,36px); background:transparent; border:none;
+    border-bottom: 4px dashed var(--ink); color:var(--pink); width: 8ch; text-align:center;
+    outline:none; caret-color: var(--ink);
+  }
+  .nameField::placeholder{ color: rgba(36,21,70,.35); }
+  .subtitle{ font-size: 16px; max-width:480px; margin: 6px auto 0; font-weight:500; }
+
+  .grid{
+    margin-top: 40px; display:grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 20px;
+  }
+
+  .box{
+    border: 4px solid var(--ink); border-radius: 16px; box-shadow: var(--shadow);
+    background: var(--card); padding: 20px 16px; text-align:center; position:relative;
+  }
+  .box:nth-child(3n+1){ background: var(--card); }
+  .box:nth-child(3n+2){ background: #FFF1D6; }
+  .box:nth-child(3n+3){ background: #FFEAF1; }
+
+  .box .tag{
+    position:absolute; top:-12px; left:-10px; background:var(--ink); color:#fff; font-family:'Space Mono',monospace;
+    font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; transform: rotate(-6deg);
+  }
+
+  .clickBtn{
+    font-family:'Bangers', cursive; font-size: 20px; letter-spacing:.03em; background: var(--pink);
+    color:#fff; border:4px solid var(--ink); padding: 12px 22px; border-radius:12px; cursor:pointer;
+    box-shadow: var(--shadow-sm); transition: transform .1s ease; width:100%;
+  }
+  .clickBtn:hover{ transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--ink); }
+  .clickBtn:active{ transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
+  .clickBtn.used{ background: var(--blue); color: var(--ink); }
+
+  .opened{
+    display:none; margin-top: 14px; font-weight:700; font-size: 14.5px; line-height:1.4;
+  }
+  .box.flipped .opened{ display:block; }
+  .box.flipped .clickBtn{ display:none; }
+
+  .controls{ text-align:center; margin-top: 34px; }
+  .btn{
+    font-family:'Bangers',cursive; font-size:18px; letter-spacing:.03em; background: var(--blue);
+    color:var(--ink); border:4px solid var(--ink); padding: 12px 26px; border-radius:12px;
+    cursor:pointer; box-shadow: var(--shadow-sm); transition: transform .12s ease;
+  }
+  .btn:hover{ transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--ink); }
+  .btn:active{ transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
+
+  footer{
+    text-align:center; margin-top: 60px; font-family:'Space Mono',monospace; font-size:12px; opacity:.6;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="badge">TAP A BOX &middot; ONE LINE EACH</span>
+    <h1 class="title">PICKUP LINE<br>VENDING MACHINE</h1>
+    <p class="subtitle">A gift for one specific menace:<br>
+      <input class="nameField" id="bfName" placeholder="his name" maxlength="14">
+    </p>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="controls">
+    <button class="btn" onclick="resetBoxes()">🔄 Reset boxes</button>
+  </div>
+
+  <footer>made with mild chaos and zero localStorage &middot; refresh to fully reset</footer>
+</div>
+
+<script>
+  const pickupLines = [
+    "Are you a parking ticket? Because you've got FINE written all over you.",
+    "Are you Wi-Fi? Because I'm feeling a connection, but also you keep dropping out.",
+    "Is your name Google? Because you're everything I've been searching for and also slightly concerning.",
+    "Do you have a map? I keep getting lost in your eyes and also possibly your driveway.",
+    "Are you a campfire? Because you're hot and I want to sit dangerously close to you.",
+    "Are you a loan? Because you've got my interest, and also crushing long-term commitment.",
+    "If you were a vegetable you'd be a cute-cumber. If I were a vegetable I'd be a disaster.",
+    "Are you made of copper and tellurium? Because you're Cu-Te and I majored in chemistry to say that.",
+    "I was going to say something really sweet, but I forgot it the moment I saw your snacks.",
+    "Are you a dictionary? Because you add meaning to my life and also I never open you enough.",
+    "Are we at the airport? Because my heart just took off. Also please help me find gate 12.",
+    "Is your body from McDonald's? Because I'm lovin' it, and also mildly concerned about my cholesterol."
+  ];
+
+  const icons = ["🎁","📦","💌","🔒","🎲","✨","🍬","🃏","🔮","📮","🧨","💘"];
+
+  const grid = document.getElementById('grid');
+
+  function buildBoxes(){
+    grid.innerHTML = '';
+    // shuffle a copy of the lines so each box gets a distinct one
+    const shuffled = [...pickupLines].sort(() => Math.random() - 0.5);
+    shuffled.forEach((line, i) => {
+      const box = document.createElement('div');
+      box.className = 'box';
+      box.innerHTML = `
+        <span class="tag">#${i+1}</span>
+        <button class="clickBtn">Click Me</button>
+        <div class="opened">${line}</div>
+      `;
+      box.querySelector('.clickBtn').addEventListener('click', () => {
+        box.classList.add('flipped');
+      });
+      grid.appendChild(box);
+    });
+  }
+
+  function resetBoxes(){
+    buildBoxes();
+  }
+
+  buildBoxes();
+</script>
+</body>
+</html>
